@@ -56,7 +56,7 @@
 
         // 2. Handle Empty Database
         if (count <= 0) {
-            printf("(No candidates found in the system)\n");
+            printf("(No candidates found in the system. Ensure your admin has registered some.)\n");
             return;
         }
 
@@ -281,7 +281,7 @@ the voting logic module for validation*/
             int auth_status = authenticate_voter(reg, pass);
             if (auth_status != STATUS_SUCCESS) {
                 if (auth_status == STATUS_VOTER_NOT_FOUND) {
-                    printf("\n[ERROR] Voter not found.\n");
+                    printf("\n[ERROR] Voter not found. Ensure your admin has registered you.\n");
                 } else {
                     printf("\n[ERROR] Invalid credentials.\n");
                 }

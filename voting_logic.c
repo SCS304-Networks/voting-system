@@ -12,9 +12,7 @@
  * Candidate IDs are sequential and start at 1.
  */
 static int get_next_candidate_id(void)
-{
-    // Acquire lock before accessing the database
-    lock_database(); 
+{ 
 
     /* Read existing candidates to determine the highest assigned ID. */
     FILE *fp = fopen("candidates.dat", "rb");
@@ -34,8 +32,6 @@ static int get_next_candidate_id(void)
 
     fclose(fp);
 
-    // Release lock after done accessing the database
-    unlock_database();
 
     // Return the next ID (max_id + 1). If max_id is 0, this will return 1.
     if (max_id < 0) max_id = 0;
@@ -149,6 +145,7 @@ int process_registration(const char *name, const char *pos)
         return STATUS_INVALID_INPUT; // Showing this error for overly long names to prevent file corruption
     }
 
+    lock_database(); // Acquire lock before accessing the database to ensure safe concurrent access
     Candidate c;
 
     // Assign a unique ID to the candidate based on the current highest ID in the database
@@ -168,5 +165,8 @@ int process_registration(const char *name, const char *pos)
 
     c.votes = 0;
 
-    return save_candidate(c);
+    int status = save_candidate(c);
+
+    unlock_database(); // Release lock after done accessing the database
+    return status;
 }

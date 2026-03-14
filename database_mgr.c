@@ -152,7 +152,6 @@ Voter load_voter(char *reg_no) {
 int save_candidate(Candidate c) {
     if (!is_election_open()) return STATUS_ELECTION_CLOSED; // Election closed
 
-    lock_database(); // Acquire lock before accessing the database
     
     FILE *fp = fopen("candidates.dat", "ab"); 
 
@@ -170,10 +169,10 @@ int save_candidate(Candidate c) {
     //close the file after writing
     fclose(fp);
 
-    unlock_database(); // Release lock after done accessing the database
 
     //confirmation message
     printf("Candidate %s saved successfully.\n", c.name); 
+    fflush(stdout);
     return STATUS_SUCCESS; // Success
 }
 
@@ -281,6 +280,12 @@ int mark_voter_done(char *reg_no) {
 int get_candidates_by_position(const char* pos, Candidate* results, int max_count) {
     
     lock_database(); // Acquire lock before accessing the database
+
+    // Open in append mode and close immediately. 
+    // This creates the file if it's missing but DOES NOT erase data if it exists.
+    FILE *touch = fopen("candidates.dat", "ab");
+    if (touch) fclose(touch);
+    
     Candidate temp;
     int count = 0;
 
