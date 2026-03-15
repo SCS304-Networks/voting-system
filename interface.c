@@ -90,7 +90,13 @@ the voting logic module for validation*/
         
         char name[50], position[50];
 
-        printf("\n--- CANDIDATE REGISTRATION ---");
+        printf("\n--- CANDIDATE REGISTRATION ---\n");
+        
+        // Display available positions
+        printf("\nAvailable Positions:\n");
+        for (int i = 0; i < NUM_POSITIONS; i++) {
+            printf("  %d. %s\n", i + 1, VALID_POSITIONS[i]);
+        }
 
         // Get Candidate Name : getchar() clears the input buffer
         printf("\nEnter Candidate Name: ");
@@ -171,7 +177,21 @@ the voting logic module for validation*/
                 printf("\n[INFO] Results are not available. Election is still ongoing.\n");
                 return;
             }
-            // If election is closed, we can read from the final_results.txt file and print it
+            
+            // Check if final_results.txt exists, if not generate it
+            FILE *fp = fopen("final_results.txt", "r");
+            if (!fp) {
+                printf("\n[INFO] Generating final results...\n");
+                int result = print_and_save_final_report();
+                if (result < 0) {
+                    printf("[ERROR] Could not generate results.\n");
+                    return;
+                }
+            } else {
+                fclose(fp);
+            }
+            
+            // Now read and display the results
             print_results_from_file();
         }
 
@@ -299,6 +319,16 @@ the voting logic module for validation*/
                 return;
             }
 
+            // Check if there are any candidates registered before proceeding to vote
+            Candidate all_candidates[MAX_CANDIDATES] = {0};
+            int candidate_count = get_candidates_by_position("ALL", all_candidates, MAX_CANDIDATES);
+            if (candidate_count <= 0) {
+                printf("\n--- NO CANDIDATES REGISTERED ---\n");
+                printf("There are currently no candidates registered for any position.\n");
+                printf("Please contact your administrator or try again later.\n");
+                return;
+            }
+
             // Proceed to cast the vote
             casting_screen(reg); 
         }
@@ -342,7 +372,7 @@ the voting logic module for validation*/
         printf("\n--- ADMIN AUTHENTICATION ---");
 
         // Prompt for the admin security key
-        printf("\nEnter Admin Security Key: ");
+        printf("\nEnter Admin Security Key ( The key is : SONU_ADMIN_2026 ): ");
         scanf("%19s", admin_key);
 
         // Check the entered key against the hardcoded admin key
